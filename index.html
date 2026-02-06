@@ -1,0 +1,599 @@
+<!-- START OF FILE odes_to_the_gods_npc.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>颂神之人 NPC 档案录</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --greek-blue: #0e4d92;       
+            --greek-blue-light: #2a75bb;
+            --greek-gold: #c5a059;       
+            --greek-gold-bright: #e6c67c;
+            --marble-white: #f4f1ea;     
+            --marble-shadow: #e0dcd3;
+            --text-dark: #2c2c2c;        
+            --danger-red: #b33a3a;       
+        }
+
+        /* 基础动画与样式 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes statusPulse { 0% { opacity: 0.6; } 50% { opacity: 1; color: var(--greek-blue-light); } 100% { opacity: 0.6; } }
+        @keyframes urgentPulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px var(--danger-red); }
+            50% { transform: scale(1.02); box-shadow: 0 0 15px var(--danger-red); }
+            100% { transform: scale(1); box-shadow: 0 0 5px var(--danger-red); }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--marble-white);
+            color: var(--text-dark);
+            font-family: 'Noto Serif SC', serif;
+            margin: 0; padding: 0;
+            height: 100vh; /* 全屏高度 */
+            display: flex; flex-direction: column; /* 垂直布局 */
+            overflow: hidden; /* 禁止body滚动，交给内部容器 */
+            background-image: 
+                radial-gradient(circle at 50% 50%, #ffffff 0%, transparent 60%),
+                repeating-linear-gradient(45deg, rgba(197, 160, 89, 0.05) 0px, rgba(197, 160, 89, 0.05) 2px, transparent 2px, transparent 10px);
+        }
+
+        /* 顶部装饰线 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 6px;
+            background: repeating-linear-gradient(90deg, var(--greek-blue) 0, var(--greek-blue) 20px, var(--greek-gold) 20px, var(--greek-gold) 40px);
+            z-index: 2000;
+        }
+
+        /* 1. 顶部区域 (不滚动) */
+        .header-section {
+            flex-shrink: 0;
+            background: rgba(244, 241, 234, 0.98);
+            border-bottom: 3px double var(--greek-gold);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px 20px 15px 20px;
+            z-index: 100;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: var(--greek-blue);
+            font-size: 2.2em;
+            letter-spacing: 3px;
+            text-shadow: 1px 1px 0px var(--greek-gold);
+            margin: 5px 0 5px 0;
+            text-align: center;
+            border-bottom: 2px solid var(--greek-gold);
+            padding-bottom: 8px;
+        }
+
+        #status { 
+            font-family: 'Cinzel', serif;
+            font-size: 0.9em; 
+            color: var(--greek-blue); 
+            margin: 5px 0 12px 0; 
+            font-weight: bold;
+            animation: statusPulse 3s infinite; 
+        }
+
+        .controls { 
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; 
+        }
+
+        /* 2. 主体布局区域 (用于居中和Padding) */
+        .main-layout {
+            flex-grow: 1; /* 占据剩余高度 */
+            width: 100%;
+            padding: 20px; /* 外部留白 */
+            display: flex;
+            justify-content: center;
+            overflow: hidden; /* 这里不滚动 */
+        }
+
+        /* 3. 表格容器 (核心修改：滚动条和边框加在这里) */
+        .table-window {
+            width: 100%; max-width: 1200px;
+            background: #fff;
+            border: 2px solid var(--greek-blue); /* 边框固定在窗口上 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            
+            overflow-y: auto; /* 核心：内部滚动 */
+            display: flex; flex-direction: column; /* 确保table撑开 */
+            position: relative;
+        }
+
+        /* 表格样式 */
+        table { 
+            width: 100%; 
+            border-collapse: separate; /* 关键：分离模式 */
+            border-spacing: 0;         /* 去除间隙 */
+        }
+
+        /* 表头吸顶 */
+        thead {
+            position: sticky; top: 0; z-index: 50;
+        }
+
+        th { 
+            background: var(--greek-blue); /* 必须不透明 */
+            color: #fff; 
+            padding: 15px 12px; 
+            text-align: left; 
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            font-size: 0.95em;
+            border-bottom: 3px solid var(--greek-gold); /* 金色分割线 */
+            
+            /* 解决可能的渲染缝隙 */
+            position: sticky; top: 0; z-index: 50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        td { 
+            padding: 12px 10px; 
+            font-size: 0.95em; 
+            color: var(--text-dark); 
+            vertical-align: middle;
+            border-bottom: 1px solid #eee; /* 手动画行线 */
+            background: #fff; /* 确保内容背景不透明 */
+        }
+        
+        tr:last-child td { border-bottom: none; } /* 最后一行去线 */
+        tr:hover td { background-color: rgba(197, 160, 89, 0.08); }
+
+        /* 按钮与组件样式 */
+        .btn {
+            background: #fff; color: var(--greek-blue); 
+            border: 1px solid var(--greek-blue);
+            padding: 6px 16px; cursor: pointer; 
+            font-family: 'Cinzel', serif; font-weight: bold; font-size: 0.8em;
+            transition: all 0.3s; box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            height: 34px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 2px;
+        }
+        .btn:hover { background: var(--greek-blue); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(14, 77, 146, 0.3); }
+        .btn-sync { border-color: var(--greek-gold); color: #8a6d3b; }
+        .btn-sync:hover { background: var(--greek-gold); color: #fff; border-color: var(--greek-gold); }
+        .btn-unsaved { background: #fff !important; border-color: var(--danger-red) !important; color: var(--danger-red) !important; animation: urgentPulse 2s infinite ease-in-out !important; }
+
+        .admin-controls { display: none; gap: 10px; align-items: center; }
+        body.editing-active .admin-controls { display: flex; flex-wrap: wrap; justify-content: center; }
+        .separator { width: 1px; height: 20px; background: var(--greek-gold); margin: 0 4px; opacity: 0.5; }
+        .btn-toggle-edit { border-color: #999; color: #777; }
+        body.editing-active .btn-toggle-edit { border-color: var(--greek-blue); color: var(--greek-blue); background: rgba(14, 77, 146, 0.1); }
+        
+        /* 单元格与输入 */
+        .name-cell { font-family: 'Cinzel', serif; color: var(--greek-blue) !important; font-weight: bold; font-size: 1.05em; }
+        .role-cell { color: #555 !important; font-style: italic; border-right: 1px dashed #ddd; }
+        .goal-cell { color: #8a6d3b !important; border-right: 1px dashed #ddd;}
+        body.editing-active [contenteditable="true"]:focus { outline: none; border-bottom: 2px solid var(--greek-blue); background: rgba(14, 77, 146, 0.05); }
+        .action-col { display: none; }
+        body.editing-active .action-col { display: table-cell; }
+
+        .portrait-cell img {
+            width: 55px; height: 55px; object-fit: cover; border-radius: 50%;
+            border: 2px solid var(--greek-gold); cursor: zoom-in;
+            background: #fff; transition: transform 0.3s;
+            display: block; margin: 0 auto;
+            position: relative; z-index: 1; 
+        }
+        .portrait-cell img:hover { 
+            transform: scale(1.6); border-radius: 4px; 
+            z-index: 100; position: relative; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4); border-color: var(--greek-blue);
+        }
+
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 80px; }
+        .action-btn { background: #fff; border: 1px solid #ccc; color: #555; height: 24px; font-size: 11px; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 3px; }
+        .action-btn:hover { background: var(--greek-blue); color: #fff; border-color: var(--greek-blue); }
+        .btn-danger:hover { background: var(--danger-red); color: #fff; border-color: var(--danger-red); }
+
+        /* 模态框 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(14, 77, 146, 0.4); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        #zoomModal img { max-width: 80%; max-height: 80%; border: 5px solid #fff; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .upload-panel { background: #fff; border: 2px solid var(--greek-blue); padding: 30px; width: 450px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 4px; }
+        .upload-panel h3 { font-family: 'Cinzel', serif; color: var(--greek-blue); margin-top: 0; }
+        .upload-area { border: 2px dashed var(--greek-gold); background: #fafafa; padding: 25px; margin: 15px 0; color: #888; cursor: pointer; transition: 0.2s; }
+        .upload-area:hover { background: #f0f0f0; border-color: var(--greek-blue); color: var(--greek-blue); }
+        .url-input { width: 90%; padding: 10px; background: #fff; border: 1px solid #ccc; color: #333; margin-bottom: 15px; font-family: inherit; }
+        .noun-panel { width: 600px; max-width: 90vw; }
+        .noun-textarea { width: 100%; height: 350px; background: #fafafa; color: var(--text-dark); border: 1px solid #ccc; padding: 15px; font-family: 'Noto Serif SC', serif; font-size: 1.1em; line-height: 1.6; resize: none; margin-bottom: 15px; }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 1.6em; }
+            .header-section { padding: 10px; }
+            .main-layout { padding: 10px 5px; }
+            th, td { padding: 8px 4px; font-size: 0.85em; }
+            .portrait-cell img { width: 40px; height: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 顶部固定区域 -->
+    <div class="header-section">
+        <h1>颂神之人 NPC 档案录</h1>
+        <div id="status">正在聆听英雄神的回响...</div>
+
+        <div class="controls">
+            <button class="btn btn-toggle-edit" onclick="toggleEditMode()" id="editToggleBtn">✎ 编辑模式</button>
+            <button class="btn" onclick="loadFromCloud()">↻ 查阅档案</button>
+            <button class="btn" onclick="exportJSON()">⬇ 导出卷轴</button>
+
+            <div class="admin-controls">
+                <div class="separator"></div>
+                <button class="btn" onclick="openNounModal()">📖 世界观/词条</button>
+                <button class="btn" onclick="addNewRow()">+ 新增条目</button>
+                <button class="btn btn-sync" id="save-btn" onclick="saveToCloud()">● 刻入石碑</button>
+                <button class="btn" onclick="document.getElementById('importFile').click()">⬆ 导入覆盖</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 主体区域：包含可滚动的表格窗口 -->
+    <div class="main-layout">
+        <!-- 核心变化：.table-window 负责 overflow-y: auto 和 border -->
+        <div class="table-window" id="scrollWindow">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="80" style="text-align: center;">肖像</th>
+                        <th width="160">姓名</th>
+                        <th width="180">身份 / 阵营</th>
+                        <th width="220">宿愿 / 动机</th>
+                        <th>传闻与备注</th>
+                        <th width="90" class="action-col" style="text-align: center;">神意</th>
+                    </tr>
+                </thead>
+                <tbody id="npcBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importJSON(this)">
+    <input type="file" id="fileInput" style="display:none" accept="image/*">
+
+    <!-- 弹窗 -->
+    <div id="zoomModal" class="modal-overlay" onclick="this.style.display='none'">
+        <img id="modalImg" src="">
+    </div>
+
+    <div id="uploadModal" class="modal-overlay">
+        <div class="upload-panel">
+            <h3>幻象上传</h3>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">点击选择或 Ctrl+V 粘贴图片</div>
+            <input type="text" id="urlInput" class="url-input" placeholder="或直接输入图片链接...">
+            <div style="display:flex; justify-content: center; gap:10px;">
+                <button class="btn" onclick="submitUrl()">确定</button>
+                <button class="btn" style="border-color:#ccc; color:#666;" onclick="closeUploadModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="nounModal" class="modal-overlay">
+        <div class="upload-panel noun-panel">
+            <h3>史诗与词条记录</h3>
+            <textarea id="nounTextarea" class="noun-textarea" placeholder="在此记录艾布利多斯的恩怨、城邦黑话，或是英雄神的预言..."></textarea>
+            <div style="display:flex; justify-content: center; gap:10px;">
+                <button class="btn" onclick="saveNounRecords()">记录</button>
+                <button class="btn" style="border-color:#ccc; color:#666;" onclick="closeNounModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const BIN_ID = '6983e1beae596e708f11e84d';
+        const API_KEY = '$2a$10$RSSVBbu/p5f9BTBlDi53NO4brY0JiF6ErV42uH.s0GAIFTK3YKiUC';
+        
+        // ImgBB
+        const IMG_BB_KEY = '192ec7a9ecdec9b51ffed683da3842dc';
+        const ACCESS_PASSWORD = '781674';
+
+        let npcData = [];
+        let nounRecords = ""; 
+        let isEditMode = false;
+        let hasUnsavedChanges = false;
+        let currentEditingIndex = -1;
+        const DEFAULT_IMG = 'https://i.ibb.co/mFr8QwJm/image.png';
+
+        window.onload = loadFromCloud;
+
+        document.addEventListener('paste', function(e) {
+            if (e.target.getAttribute('contenteditable')) {
+                e.preventDefault();
+                const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
+            }
+            if (document.getElementById('uploadModal').style.display === 'flex') {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let item of items) {
+                    if (item.type.indexOf("image") !== -1) uploadFile(item.getAsFile());
+                }
+            }
+        });
+
+        window.onbeforeunload = function(e) {
+            if (hasUnsavedChanges) return '命运的丝线尚未编织完成，确定要离开吗？';
+        };
+
+        function setUnsavedState(isDirty) {
+            hasUnsavedChanges = isDirty;
+            const saveBtn = document.getElementById('save-btn');
+            if (isDirty) {
+                saveBtn.classList.add('btn-unsaved');
+                saveBtn.innerHTML = "⚠ 尚未刻入";
+                document.title = "* 未保存 - 颂神之人档案";
+            } else {
+                saveBtn.classList.remove('btn-unsaved');
+                saveBtn.innerHTML = "● 刻入石碑";
+                document.title = "颂神之人 NPC 档案录";
+            }
+        }
+
+        function toggleEditMode() {
+            if (!isEditMode) {
+                if (prompt("请输入独眼巨人密语 (DM Password):") === ACCESS_PASSWORD) {
+                    isEditMode = true;
+                    document.body.classList.add('editing-active');
+                    document.getElementById('editToggleBtn').innerHTML = "👁 观察模式";
+                }
+            } else {
+                isEditMode = false;
+                document.body.classList.remove('editing-active');
+                document.getElementById('editToggleBtn').innerHTML = "✎ 编辑模式";
+            }
+            renderTable();
+        }
+
+        async function loadFromCloud() {
+            showStatus("正在从基诺斯忒斯处接收信件...");
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY, 'X-Bin-Meta': false }
+                });
+                
+                if (!res.ok) throw new Error("API Error");
+
+                const data = await res.json();
+                
+                if (data.npcs) {
+                    npcData = data.npcs;
+                    nounRecords = data.nouns || "";
+                } else {
+                    npcData = data; 
+                    nounRecords = "";
+                }
+                
+                renderTable();
+                setUnsavedState(false);
+                showStatus("档案已展开。");
+            } catch (err) { 
+                console.error(err);
+                showStatus("无法连接至神域 (同步失败)。"); 
+            }
+        }
+
+        async function saveToCloud() {
+            if (prompt("确认修改命运吗？(输入密语):") !== ACCESS_PASSWORD) return;
+            showStatus("正在献祭数据...");
+            
+            const payload = {
+                npcs: npcData,
+                nouns: nounRecords
+            };
+
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+                    body: JSON.stringify(payload)
+                });
+                setUnsavedState(false);
+                showStatus("石碑已铭刻。");
+            } catch (err) { showStatus("献祭失败。"); }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("npcBody");
+            tbody.innerHTML = '';
+            const editableAttr = isEditMode ? 'contenteditable="true"' : '';
+
+            if (!npcData || !Array.isArray(npcData)) { npcData = []; }
+
+            npcData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                const imgSrc = item.img || DEFAULT_IMG;
+                const name = item.name || '';
+                const role = item.role || '';
+                const goal = item.goal || '';
+                const note = item.note || '';
+
+                row.innerHTML = `
+                    <td class="portrait-cell" align="center"><img src="${imgSrc}" onerror="this.src='${DEFAULT_IMG}'" onclick="zoomImg(this.src)"></td>
+                    <td ${editableAttr} class="name-cell" onblur="updateData(${index}, 'name', this.innerText)">${name}</td>
+                    <td ${editableAttr} class="role-cell" onblur="updateData(${index}, 'role', this.innerText)">${role}</td>
+                    <td ${editableAttr} class="goal-cell" onblur="updateData(${index}, 'goal', this.innerText)">${goal}</td>
+                    <td ${editableAttr} onblur="updateData(${index}, 'note', this.innerText)">${note}</td>
+                    <td class="action-col">
+                        <div class="action-grid">
+                            <button class="action-btn" onclick="moveRow(${index}, -1)" title="上移">▲</button>
+                            <button class="action-btn" onclick="moveRow(${index}, 1)" title="下移">▼</button>
+                            <button class="action-btn" onclick="openUploadModal(${index})">换图</button>
+                            <button class="action-btn btn-danger" onclick="deleteRow(${index})">☠</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateData(index, field, value) {
+            const safeValue = value ? value.trim() : "";
+            if (npcData[index][field] !== safeValue) {
+                npcData[index][field] = safeValue;
+                setUnsavedState(true);
+            }
+        }
+
+        function addNewRow() {
+            npcData.push({img: DEFAULT_IMG, name: '新角色', role: '身份', goal: '目标', note: ''});
+            renderTable();
+            setUnsavedState(true);
+            // 滚动到内部窗口的底部
+            setTimeout(() => {
+                const container = document.getElementById('scrollWindow');
+                container.scrollTop = container.scrollHeight;
+            }, 50);
+        }
+
+        function deleteRow(index) {
+            if(confirm("确定要剪断此人的命运丝线吗？")) { npcData.splice(index, 1); renderTable(); setUnsavedState(true); }
+        }
+
+        function moveRow(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < npcData.length) {
+                [npcData[index], npcData[newIndex]] = [npcData[newIndex], npcData[index]];
+                renderTable();
+                setUnsavedState(true);
+            }
+        }
+
+        function openUploadModal(index) {
+            currentEditingIndex = index;
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+        function closeUploadModal() { document.getElementById('uploadModal').style.display = 'none'; }
+
+        function openNounModal() {
+            document.getElementById('nounTextarea').value = nounRecords;
+            document.getElementById('nounModal').style.display = 'flex';
+        }
+        function closeNounModal() {
+            document.getElementById('nounModal').style.display = 'none';
+        }
+        function saveNounRecords() {
+            const newValue = document.getElementById('nounTextarea').value;
+            if (nounRecords !== newValue) {
+                nounRecords = newValue;
+                setUnsavedState(true);
+            }
+            closeNounModal();
+        }
+
+        async function processImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_SIZE = 800; 
+                        
+                        if (width > height) {
+                            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                        } else {
+                            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                const processedFile = new File([blob], "upload.webp", { type: "image/webp" });
+                                resolve(processedFile);
+                            } else {
+                                reject(new Error("Canvas conversion failed"));
+                            }
+                        }, 'image/webp', 0.85);
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        async function uploadFile(file) {
+            if (!file) return;
+            showStatus("正在通过彩虹桥传输(压缩中)...");
+            closeUploadModal();
+            try {
+                const processedFile = await processImage(file);
+                const formData = new FormData();
+                formData.append("image", processedFile);
+                
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMG_BB_KEY}`, { method: "POST", body: formData });
+                const result = await res.json();
+                if (result.success) {
+                    npcData[currentEditingIndex].img = result.data.url;
+                    renderTable();
+                    setUnsavedState(true);
+                    showStatus("画像已挂起。");
+                }
+            } catch (err) { 
+                console.error(err);
+                showStatus("上传失败，祭品被拒绝。"); 
+            }
+        }
+
+        function submitUrl() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (url) {
+                npcData[currentEditingIndex].img = url;
+                renderTable(); setUnsavedState(true); closeUploadModal();
+            }
+        }
+
+        document.getElementById('fileInput').onchange = (e) => uploadFile(e.target.files[0]);
+
+        function zoomImg(src) {
+            document.getElementById('modalImg').src = src;
+            document.getElementById('zoomModal').style.display = 'flex';
+        }
+
+        function exportJSON() {
+            const payload = { npcs: npcData, nouns: nounRecords };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `Odes_NPCs_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function importJSON(input) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.npcs) {
+                        npcData = data.npcs;
+                        nounRecords = data.nouns || "";
+                    } else {
+                        npcData = data;
+                        nounRecords = "";
+                    }
+                    renderTable(); setUnsavedState(true); showStatus("历史卷轴已展开。");
+                } catch (err) { alert("卷轴无法解读（格式错误）"); }
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        function showStatus(msg) { document.getElementById("status").innerText = msg; }
+    </script>
+</body>
+</html>
